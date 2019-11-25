@@ -209,6 +209,49 @@ public class Assignment {
         return 0;
     }
 
+    public void printSimilarItems(long mid)
+	{
+		ArrayList<String> similarMIDs = getSimilarMIDs(mid);
+		for (String similarMID : similarMIDs)
+		{
+			System.out.println(similarMID);
+		}
+	}
+
+	private ArrayList<String> getSimilarMIDs(long mid)
+	{
+
+		if(this.connection == null){
+			connectToDB();
+		}
+		ArrayList<String> ans = new  ArrayList<String>();
+		PreparedStatement ps = null;
+		String query = "SELECT MEDIAITEMS.TITLE as TITLE,SIMILARITY.MID2,SIMILARITY.SIMILARITY as SIM FROM SIMILARITY " +
+                "INNER JOIN MEDIAITEMS ON SIMILARITY.MID2=MEDIAITEMS.MID WHERE MID1=? ORDER BY SIMILARITY DESC";
+		try{
+
+			ps = connection.prepareStatement(query); //compiling query in the DB
+			ps.setLong(1, mid);
+			ResultSet rs=ps.executeQuery();
+			while(rs.next()){
+				if (rs.getDouble("SIM") >  0)
+					ans.add(rs.getString("TITLE"));
+			}
+			rs.close();
+		}catch (SQLException e) {
+			e.printStackTrace();
+		}finally{
+			try{
+				if(ps != null){
+					ps.close();
+				}
+			}catch (SQLException e3) {
+				e3.printStackTrace();
+			}
+		}
+		return ans;
+	}
+
     public static void main(String[] args) {
         Assignment ass = new Assignment("1", "2", "3");
 
